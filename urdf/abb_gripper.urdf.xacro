@@ -1,0 +1,227 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- This URDF was automatically created by SolidWorks to URDF Exporter! Originally created by Stephen Brawner (brawner@gmail.com) 
+     Commit Version: 1.6.0-4-g7f85cfe  Build Version: 1.6.7995.38578
+     For more information, please see http://wiki.ros.org/sw_urdf_exporter -->
+
+<robot name="abb_gripper2" xmlns:xacro="http://ros.org/wiki/xacro">
+
+  <!-- ============================================= -->
+  <!-- NEW: Gazebo-specific tags for simulation -->
+  <!-- ============================================= -->
+  <!-- Defines the ros2_control interface for the gripper joints -->
+  <!-- <ros2_control name="ABB_Gripper" type="actuator">
+    <hardware>
+      <plugin>ros2_control_demo_hardware/Actuator</plugin>
+    </hardware>
+    <joint name="ABB_Gripper_Finger_1_Joint">
+      <command_interface name="position">
+        <param name="min">0</param>
+        <param name="max">0.05</param>
+      </command_interface>
+      <state_interface name="position"/>
+    </joint>
+    <joint name="ABB_Gripper_Finger_2_Joint">
+      <command_interface name="position">
+        <param name="min">0</param>
+        <param name="max">0.05</param>
+      </command_interface>
+      <state_interface name="position"/>
+    </joint>
+  </ros2_control> -->
+
+  <!-- Gazebo plugin for ros2_control to bridge with the simulation -->
+  <!-- <gazebo>
+    <plugin filename="libign_ros2_control.so" name="ign_ros2_control::IgnitionROS2ControlPlugin">
+      <ros>
+        <namespace>abb_gripper</namespace>
+      </ros>
+      <parameters>$(find-pkg-share abb_gripper)/config/ros2_controllers.yaml</parameters>
+    </plugin>
+  </gazebo> -->
+
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="-6.16229807088287E-05 0.000397044841007611 0.0601224512562915"
+        rpy="0 0 0" />
+      <mass
+        value="0.11334946311637" />
+      <inertia
+        ixx="0.000118523378283267"
+        ixy="4.05959251897651E-08"
+        ixz="2.09444182034886E-07"
+        iyy="0.000132170090215626"
+        iyz="-1.74630848024325E-06"
+        izz="2.68714333136684E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh filename="file://$(find abb_gripper)/meshes/base_link.STL"/>
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh filename="file://$(find abb_gripper)/meshes/base_link.STL"/>
+      </geometry>
+    </collision>
+    <gazebo reference="gripper_base_link">
+      <material>Gazebo/Grey</material>
+    </gazebo>
+  </link>
+  <link
+    name="ABB_Gripper_Finger_1">
+    <inertial>
+      <origin
+        xyz="4.8407E-07 0.039218 -0.010001"
+        rpy="0 0 0" />
+      <mass
+        value="0.019385" />
+      <inertia
+        ixx="8.3469E-06"
+        ixy="2.3563E-10"
+        ixz="8.0656E-11"
+        iyy="9.7422E-07"
+        iyz="3.9475E-07"
+        izz="8.3545E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh filename="file://$(find abb_gripper)/meshes/ABB_Gripper_Finger_1.STL"/>
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh filename="file://$(find abb_gripper)/meshes/ABB_Gripper_Finger_1.STL"/>
+      </geometry>
+    </collision>
+    <gazebo reference="ABB_Gripper_Finger_1">
+      <material>Gazebo/White</material>
+    </gazebo>
+  </link>
+  <joint
+    name="ABB_Gripper_Finger_1_Joint"
+    type="prismatic">
+    <origin
+      xyz="-0.003375 0.00175 0.10638"
+      rpy="1.5708 0 1.5708" />
+    <parent
+      link="base_link" />
+    <child
+      link="ABB_Gripper_Finger_1" />
+    <axis
+      xyz="0 0 -1" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+    <gazebo reference="ABB_Gripper_Finger_1_Joint">
+      <provide_feedback>true</provide_feedback>
+      <physics>
+        <ode>
+          <limit>
+            <cfm>0.001</cfm>
+            <erp>0.9</erp>
+          </limit>
+        </ode>
+      </physics>
+    </gazebo>
+  </joint>
+  <link
+    name="ABB_Gripper_Finger_2">
+    <inertial>
+      <origin
+        xyz="4.8407E-07 0.039218 -0.010001"
+        rpy="0 0 0" />
+      <mass
+        value="0.019385" />
+      <inertia
+        ixx="8.3469E-06"
+        ixy="2.3563E-10"
+        ixz="8.0656E-11"
+        iyy="9.7422E-07"
+        iyz="3.9475E-07"
+        izz="8.3545E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh filename="file://$(find abb_gripper)/meshes/ABB_Gripper_Finger_2.STL"/>
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh filename="file://$(find abb_gripper)/meshes/ABB_Gripper_Finger_2.STL"/>
+      </geometry>
+    </collision>
+    <gazebo reference="ABB_Gripper_Finger_2">
+      <material>Gazebo/White</material>
+    </gazebo>
+  </link>
+  <joint
+    name="ABB_Gripper_Finger_2_Joint"
+    type="prismatic">
+    <origin
+      xyz="0.0038418 0.00175 0.10638"
+      rpy="1.5708 0 -1.5708" />
+    <parent
+      link="base_link" />
+    <child
+      link="ABB_Gripper_Finger_2" />
+    <axis
+      xyz="0 0 1" />
+    <limit
+      lower="0"
+      upper="0"
+      effort="0"
+      velocity="0" />
+    <mimic
+      joint="ABB_Gripper_Finger_1_Joint"
+      multiplier="1"
+      offset="0" />
+    <gazebo reference="ABB_Gripper_Finger_2_Joint">
+      <provide_feedback>true</provide_feedback>
+      <physics>
+        <ode>
+          <limit>
+            <cfm>0.001</cfm>
+            <erp>0.9</erp>
+          </limit>
+        </ode>
+      </physics>
+    </gazebo>
+  </joint>
+</robot>
