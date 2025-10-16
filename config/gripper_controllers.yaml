@@ -1,0 +1,23 @@
+# config/gripper_controllers.yaml (Change this file!)
+controller_manager:
+  ros__parameters:
+    update_rate: 100 # Hz
+
+    joint_state_broadcaster:
+      type: joint_state_broadcaster/JointStateBroadcaster
+
+    gripper_finger_1_controller:
+      type: effort_controllers/JointGroupEffortController # <-- Change to EFFORT
+    
+    gripper_finger_2_controller:
+      type: effort_controllers/JointGroupEffortController # <-- Change to EFFORT
+
+gripper_finger_1_controller:
+  ros__parameters:
+    joints:
+      - ABB_Gripper_Finger_1_Joint
+
+gripper_finger_2_controller:
+  ros__parameters:
+    joints:
+      - ABB_Gripper_Finger_2_Joint

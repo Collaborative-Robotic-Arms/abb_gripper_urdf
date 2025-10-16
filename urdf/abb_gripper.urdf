@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<robot
+  name="abb_gripper_urdf">
+  <link
+    name="base_link">
+    <inertial>
+      <origin
+        xyz="-6.16229807088257E-05 0.00039704484100761 0.0601224512562915"
+        rpy="0 0 0" />
+      <mass
+        value="0.11334946311637" />
+      <inertia
+        ixx="0.000118523378283267"
+        ixy="4.05959251897763E-08"
+        ixz="2.09444182034881E-07"
+        iyy="0.000132170090215625"
+        iyz="-1.74630848024324E-06"
+        izz="2.68714333136684E-05" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://abb_gripper_urdf/meshes/base_link.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="0.792156862745098 0.819607843137255 0.933333333333333 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://abb_gripper_urdf/meshes/base_link.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <link
+    name="ABB_Gripper_Finger_1">
+    <inertial>
+      <origin
+        xyz="-0.00137548357483305 0.00571756972716975 0.00987552240764338"
+        rpy="0 0 0" />
+      <mass
+        value="0.0193850335370149" />
+      <inertia
+        ixx="8.34691034859775E-06"
+        ixy="-2.3550700839682E-10"
+        ixz="8.06951044505719E-11"
+        iyy="9.74220208287176E-07"
+        iyz="-3.94748073743154E-07"
+        izz="8.35445304922416E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://abb_gripper_urdf/meshes/ABB_Gripper_Finger_1.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://abb_gripper_urdf/meshes/ABB_Gripper_Finger_1.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="ABB_Gripper_Finger_1_Joint"
+    type="prismatic">
+    <origin
+      xyz="0 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="ABB_Gripper_Finger_1" />
+    <!-- Joint axis is flipped: -1 0 0. A positive effort command will move it in the -X direction (OPEN) -->
+    <axis
+      xyz="-1 0 0" />
+    <!-- Limits set to the positive range [0, 0.0135] -->
+    <limit
+      lower="0"
+      upper="0.0135"
+      effort="1000"
+      velocity="0.5" />
+  </joint>
+  <link
+    name="ABB_Gripper_Finger_2">
+    <inertial>
+      <origin
+        xyz="0.00212451642516689 0.00571756972716975 0.00962552240764315"
+        rpy="0 0 0" />
+      <mass
+        value="0.0193850335370149" />
+      <inertia
+        ixx="8.34691034859809E-06"
+        ixy="-2.3550700839782E-10"
+        ixz="8.06951044542216E-11"
+        iyy="9.74220208287554E-07"
+        iyz="-3.94748073743023E-07"
+        izz="8.35445304922412E-06" />
+    </inertial>
+    <visual>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://abb_gripper_urdf/meshes/ABB_Gripper_Finger_2.STL" />
+      </geometry>
+      <material
+        name="">
+        <color
+          rgba="1 1 1 1" />
+      </material>
+    </visual>
+    <collision>
+      <origin
+        xyz="0 0 0"
+        rpy="0 0 0" />
+      <geometry>
+        <mesh
+          filename="package://abb_gripper_urdf/meshes/ABB_Gripper_Finger_2.STL" />
+      </geometry>
+    </collision>
+  </link>
+  <joint
+    name="ABB_Gripper_Finger_2_Joint"
+    type="prismatic">
+    <origin
+      xyz="0 0 0"
+      rpy="0 0 0" />
+    <parent
+      link="base_link" />
+    <child
+      link="ABB_Gripper_Finger_2" />
+    <!-- Joint axis is standard: 1 0 0. A positive effort command will move it in the +X direction (OPEN) -->
+    <axis
+      xyz="1 0 0" />
+    <limit
+      lower="0"
+      upper="0.0135"
+      effort="1000"
+      velocity="0.5" />
+  </joint>
+
+  <transmission name="ABB_Gripper_Finger_1_Trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="ABB_Gripper_Finger_1_Joint">
+      <!-- Using EffortJointInterface for stability -->
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="ABB_Gripper_Finger_1_Motor">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+
+  <transmission name="ABB_Gripper_Finger_2_Trans">
+    <type>transmission_interface/SimpleTransmission</type>
+    <joint name="ABB_Gripper_Finger_2_Joint">
+      <!-- Using EffortJointInterface for stability -->
+      <hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface>
+    </joint>
+    <actuator name="ABB_Gripper_Finger_2_Motor">
+      <mechanicalReduction>1</mechanicalReduction>
+    </actuator>
+  </transmission>
+  
+  <gazebo>
+    <plugin filename="libgz_ros2_control-system.so" name="gz_ros2_control::GazeboSimROS2ControlPlugin">
+      <parameters>$(find abb_gripper_urdf)/config/gripper_controllers.yaml</parameters>
+      <ros>
+          <parameters>
+              <param name="use_sim_time" type="bool">true</param>
+          </parameters>
+      </ros>
+    </plugin>
+  </gazebo>
+
+  <ros2_control name="GazeboSimSystem" type="system">
+      <hardware>
+          <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+      </hardware>
+      
+      <!-- FINGER 1 ROS2 CONTROL BLOCK - NOW USES EFFORT COMMANDS -->
+      <joint name="ABB_Gripper_Finger_1_Joint">
+          <command_interface name="effort">
+              <param name="min">-1000.0</param>
+              <param name="max">1000.0</param>
+          </command_interface>
+          <state_interface name="position" />
+          <state_interface name="velocity" />
+      </joint>
+      
+      <!-- FINGER 2 ROS2 CONTROL BLOCK - NOW USES EFFORT COMMANDS -->
+      <joint name="ABB_Gripper_Finger_2_Joint">
+          <command_interface name="effort">
+              <param name="min">-1000.0</param>
+              <param name="max">1000.0</param>
+          </command_interface>
+          <state_interface name="position" />
+          <state_interface name="velocity" />
+      </joint>
+  </ros2_control>
+</robot>

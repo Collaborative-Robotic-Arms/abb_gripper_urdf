@@ -16,7 +16,7 @@
 
 cmake_minimum_required(VERSION 3.22)
 
-project(abb_gripper)
+project(abb_gripper_urdf)
 
 find_package(ament_cmake REQUIRED)
 

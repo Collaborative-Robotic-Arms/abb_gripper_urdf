@@ -1,5 +1,5 @@
 <package format="2">
-  <name>abb_gripper</name>
+  <name>abb_gripper_urdf</name>
   <version>1.0.0</version>
   <description>
     <p>URDF Description package for Simplified ABB Gripper</p>
@@ -48,6 +48,7 @@ for Simplified ABB Gripper robot</p>
 
   <export>
       <build_type>ament_cmake</build_type>
+      <gazebo_ros gazebo_model_path="${prefix}/.." />
   </export>
 </package>
 
