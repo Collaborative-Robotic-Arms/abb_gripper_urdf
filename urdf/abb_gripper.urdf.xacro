@@ -1,82 +1,13 @@
 <?xml version="1.0"?>
-<robot xmlns:xacro="http://www.ros.org/wiki/xacro">
+<robot name="test_gripper" xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <xacro:macro name="abb_gripper" params="arm_parent_link gripper_prefix">
-    
-    <joint name="${gripper_prefix}joint_gripper_base" type="fixed">
-      <parent link="${arm_parent_link}"/>
-      <child link="${gripper_prefix}base_link"/>
-      <origin xyz="0 0 0" rpy="1.5708 0 1.5708"/> 
-    </joint>
-
-    <link name="${gripper_prefix}base_link">
-      <inertial>
-        <origin xyz="-0.00006 0.0004 0.0601" rpy="0 0 0" />
-        <mass value="0.113" />
-        <inertia ixx="0.000118" ixy="0" ixz="0" iyy="0.000132" iyz="0" izz="0.000027" />
-      </inertial>
-      <visual>
-        <geometry><mesh filename="package://abb_gripper_urdf/meshes/base_link.STL" /></geometry>
-        <material name="LightGrey"><color rgba="0.7 0.7 0.7 1.0" /></material>
-      </visual>
-      <collision>
-        <geometry><mesh filename="package://abb_gripper_urdf/meshes/base_link.STL" /></geometry>
-      </collision>
-    </link>
-    
-    <link name="${gripper_prefix}ABB_Gripper_Finger_1">
-      <inertial>
-        <origin xyz="-0.0014 0.0057 0.0099" rpy="0 0 0" />
-        <mass value="0.019" />
-        <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
-      </inertial>
-      <visual>
-        <geometry><mesh filename="package://abb_gripper_urdf/meshes/ABB_Gripper_Finger_1.STL" /></geometry>
-        <material name="White"><color rgba="1 1 1 1" /></material>
-      </visual>
-      <collision>
-        <geometry><mesh filename="package://abb_gripper_urdf/meshes/ABB_Gripper_Finger_1.STL" /></geometry>
-      </collision>
-    </link>
-    <joint name="${gripper_prefix}ABB_Gripper_Finger_1_Joint" type="prismatic">
-      <parent link="${gripper_prefix}base_link" />
-      <child link="${gripper_prefix}ABB_Gripper_Finger_1" />
-      <axis xyz="-1 0 0" />
-      <limit lower="0" upper="0.0135" effort="1000" velocity="0.5" />
-    </joint>
-    
-    <link name="${gripper_prefix}ABB_Gripper_Finger_2">
-      <inertial>
-        <origin xyz="0.0021 0.0057 0.0096" rpy="0 0 0" />
-        <mass value="0.019" />
-        <inertia ixx="1e-6" ixy="0" ixz="0" iyy="1e-6" iyz="0" izz="1e-6" />
-      </inertial>
-      <visual>
-        <geometry><mesh filename="package://abb_gripper_urdf/meshes/ABB_Gripper_Finger_2.STL" /></geometry>
-        <material name="White"><color rgba="1 1 1 1" /></material>
-      </visual>
-      <collision>
-        <geometry><mesh filename="package://abb_gripper_urdf/meshes/ABB_Gripper_Finger_2.STL" /></geometry>
-      </collision>
-    </link>
-    <joint name="${gripper_prefix}ABB_Gripper_Finger_2_Joint" type="prismatic">
-      <parent link="${gripper_prefix}base_link" />
-      <child link="${gripper_prefix}ABB_Gripper_Finger_2" />
-      <axis xyz="1 0 0" />
-      <limit lower="0" upper="0.0135" effort="1000" velocity="0.5" />
-      <mimic joint="${gripper_prefix}ABB_Gripper_Finger_1_Joint" multiplier="1" offset="0"/>
-    </joint>
-
-    <transmission name="${gripper_prefix}Trans_1">
-      <type>transmission_interface/SimpleTransmission</type>
-      <joint name="${gripper_prefix}ABB_Gripper_Finger_1_Joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface></joint>
-      <actuator name="${gripper_prefix}Motor_1"/>
-    </transmission>
-    <transmission name="${gripper_prefix}Trans_2">
-      <type>transmission_interface/SimpleTransmission</type>
-      <joint name="${gripper_prefix}ABB_Gripper_Finger_2_Joint"><hardwareInterface>hardware_interface/EffortJointInterface</hardwareInterface></joint>
-      <actuator name="${gripper_prefix}Motor_2"/>
-    </transmission>
+  <xacro:include filename="$(find abb_gripper_urdf)/urdf/abb_gripper_macro.xacro" />
   
-  </xacro:macro>
+  <link name="world"/>
+  
+  <xacro:abb_gripper 
+      arm_parent_link="world" 
+      gripper_prefix="gripper_" 
+  />
+
 </robot>

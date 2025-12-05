@@ -1,175 +1,142 @@
 import os
+import yaml
+import pprint
 from ament_index_python.packages import get_package_share_directory
 from launch import LaunchDescription
-from launch.actions import IncludeLaunchDescription, DeclareLaunchArgument, SetEnvironmentVariable, RegisterEventHandler, TimerAction
+from launch.actions import IncludeLaunchDescription, RegisterEventHandler, SetEnvironmentVariable
 from launch.launch_description_sources import PythonLaunchDescriptionSource
 from launch_ros.actions import Node
 from launch.substitutions import LaunchConfiguration, PathJoinSubstitution, Command
-from launch_ros.substitutions import FindPackageShare
 from launch_ros.parameter_descriptions import ParameterValue
-from launch.event_handlers import OnProcessExit, OnProcessStart 
+from launch.event_handlers import OnProcessExit
+
+# --- HELPER: LOAD YAML ---
+def load_yaml(package_name, file_path):
+    package_path = get_package_share_directory(package_name)
+    absolute_file_path = os.path.join(package_path, file_path)
+    try:
+        with open(absolute_file_path, 'r') as file:
+            return yaml.safe_load(file)
+    except EnvironmentError:
+        return None
+
+# --- HELPER: FLATTEN NESTED DICTS (Fixes MoveIt parameter lookup) ---
+def flatten_config(dictionary, parent_key='', sep='.'):
+    items = []
+    for k, v in dictionary.items():
+        new_key = parent_key + sep + k if parent_key else k
+        if isinstance(v, dict):
+            items.extend(flatten_config(v, new_key, sep=sep).items())
+        else:
+            items.append((new_key, v))
+    return dict(items)
 
 def generate_launch_description():
-    # --- Arguments ---
+    print("\n" + "="*50)
+    print("=== FINAL EFFORT CONTROL LAUNCH SEQUENCE ===")
+    print("="*50 + "\n")
+
     use_sim_time = LaunchConfiguration('use_sim_time', default='true')
-    
-    declare_use_sim_time_cmd = DeclareLaunchArgument(
-        'use_sim_time',
-        default_value='true',
-        description='Use simulation (Gazebo) clock if true'
-    )
-
-    # --- Package Paths & URDF Processing ---
     pkg_name = 'abb_gripper_urdf'
-    pkg_path = FindPackageShare(pkg_name)
-
-    xacro_file = PathJoinSubstitution([
-        pkg_path,
-        'urdf',
-        'abb_gripper.urdf.xacro' 
-    ])
-
-    robot_description_command = Command(['xacro ', ' ', xacro_file])
+    pkg_share = get_package_share_directory(pkg_name)
     pkg_ros_gz_sim = get_package_share_directory('ros_gz_sim')
-    gz_launch_path = PathJoinSubstitution([pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py'])
 
-    # Set the GAZEBO resource path
+    # 1. ROBOT DESCRIPTION
+    xacro_file = os.path.join(pkg_share, 'urdf', 'abb_gripper.urdf.xacro')
+    robot_description_content = Command(['xacro ', xacro_file])
+    robot_description = {'robot_description': ParameterValue(robot_description_content, value_type=str)}
+
+    srdf_file = os.path.join(pkg_share, 'config', 'abb_gripper.srdf')
+    robot_description_semantic_content = Command(['xacro ', srdf_file])
+    robot_description_semantic = {'robot_description_semantic': ParameterValue(robot_description_semantic_content, value_type=str)}
+
+    # 2. OMPL CONFIGURATION (FLATTENING)
+    ompl_yaml = load_yaml(pkg_name, "config/ompl_planning.yaml")
+    ompl_config_flat = flatten_config(ompl_yaml) if ompl_yaml else {}
+
+    print("--- FINAL FLATTENED OMPL CONFIG (MOVEIT) ---")
+    pprint.pprint(ompl_config_flat)
+    print("--------------------------------------------")
+    
+    moveit_controllers = load_yaml(pkg_name, 'config/moveit_controllers.yaml')
+    kinematics_config = load_yaml(pkg_name, 'config/kinematics.yaml')
+
+    # 3. SIMULATION SETUP
+    gz_launch_path = PathJoinSubstitution([pkg_ros_gz_sim, 'launch', 'gz_sim.launch.py'])
     set_gz_resource_path = SetEnvironmentVariable(
         name='GZ_SIM_RESOURCE_PATH',
-        value=[
-            PathJoinSubstitution([pkg_path, '']), 
-            PathJoinSubstitution([FindPackageShare('ros_gz_sim'), 'worlds'])
-        ]
+        value=[pkg_share]
     )
-
-    # --- Simulation Setup ---
-    
-    # 1. Gazebo Launch (Starts the simulation and world)
     gazebo = IncludeLaunchDescription(
         PythonLaunchDescriptionSource(gz_launch_path),
         launch_arguments={'gz_args': 'empty.sdf -r'}.items(), 
     )
-    
-    # 2. Gazebo Clock Bridge (Crucial for time synchronization)
-    clock_bridge = Node(
-        package='ros_gz_bridge',
-        executable='parameter_bridge',
-        name='clock_bridge',
-        output='screen',
-        arguments=[
-            # Bridge the Gazebo clock to the ROS /clock
-            '/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock'
-        ],
+
+    # 4. NODES
+    spawn_entity = Node(
+        package='ros_gz_sim', executable='create', output='screen',
+        arguments=['-topic', 'robot_description', '-name', 'abb_gripper', '-z', '0.5'],
         parameters=[{'use_sim_time': use_sim_time}],
     )
 
-    # 3. Robot State Publisher
     robot_state_publisher = Node(
-        package='robot_state_publisher',
-        executable='robot_state_publisher',
+        package='robot_state_publisher', executable='robot_state_publisher', output='screen',
+        parameters=[robot_description, {'use_sim_time': use_sim_time}],
+    )
+
+    joint_state_broadcaster = Node(
+        package='controller_manager', executable='spawner',
+        arguments=['joint_state_broadcaster'], output='screen',
+    )
+
+    gripper_controller = Node(
+        package='controller_manager', executable='spawner',
+        arguments=['gripper_controller'], output='screen',
+    )
+
+    move_group_node = Node(
+        package='moveit_ros_move_group',
+        executable='move_group',
         output='screen',
         parameters=[
-            {'robot_description': ParameterValue(robot_description_command, value_type=str)},
-            {'use_sim_time': use_sim_time} 
+            robot_description,
+            robot_description_semantic,
+            ompl_config_flat, 
+            {'robot_description_kinematics': kinematics_config},
+            {'moveit_controller_manager': 'moveit_simple_controller_manager/MoveItSimpleControllerManager'},
+            {'moveit_simple_controller_manager': moveit_controllers},
+            {'use_sim_time': use_sim_time},
+            {'moveit_manage_controllers': True},
         ],
     )
 
-    # 4. Spawn Entity (Launched immediately)
-    spawn_entity = Node(
-        package='ros_gz_sim',
-        executable='create',
+    rviz_node = Node(
+        package='rviz2',
+        executable='rviz2',
+        name='rviz2',
         output='screen',
-        arguments=[
-            '-topic', 'robot_description',
-            '-name', 'abb_gripper_urdf', 
-            '-x', '1.0', '-y', '1.0', '-z', '1.0'
+        parameters=[
+            robot_description,
+            robot_description_semantic,
+            ompl_config_flat,
+            {'robot_description_kinematics': kinematics_config},
+            {'use_sim_time': use_sim_time}
         ],
-        parameters=[{'use_sim_time': use_sim_time}],
     )
 
-    # --- CONTROL SETUP (NO EXTERNAL controller_manager_node) ---
-    
-    # The Controller Manager is now run internally by the Gazebo plugin.
-    # We only need the spawner nodes.
-
-    def make_spawner_node(name, controller_manager):
-        # Spawners target the Controller Manager instance that runs inside Gazebo
-        return Node(
-            package='controller_manager',
-            executable='spawner',
-            arguments=[name, '--controller-manager', controller_manager],
-            parameters=[
-                {'use_sim_time': use_sim_time} 
-            ],
-            output='screen',
-        )
-
-    # 1. Spawner node for Joint State Broadcaster
-    joint_state_broadcaster_spawner = make_spawner_node(
-        'joint_state_broadcaster', '/controller_manager'
-    )
-    
-    # 2. Spawner node for Finger 1 Position Controller
-    gripper_1_controller_spawner = make_spawner_node(
-        'gripper_finger_1_controller', '/controller_manager'
-    )
-    
-    # 3. Spawner node for Finger 2 Position Controller
-    gripper_2_controller_spawner = make_spawner_node(
-        'gripper_finger_2_controller', '/controller_manager'
-    )
-
-    # --- Event Handlers to enforce reliable startup order (Time delay removed) ---
-    
-    # The robot model is now spawned right away (not delayed by TimerAction).
-
-    # 1. After the model is spawned, start the Joint State Broadcaster
-    delay_broadcaster_spawner = RegisterEventHandler(
-        OnProcessExit(
-            target_action=spawn_entity, 
-            on_exit=[
-                joint_state_broadcaster_spawner
-            ]
-        )
-    )
-
-    # 2. After the Broadcaster is ready, start the first gripper controller
-    delay_gripper_1_spawner = RegisterEventHandler(
-        OnProcessExit(
-            target_action=joint_state_broadcaster_spawner,
-            on_exit=[
-                gripper_1_controller_spawner
-            ]
-        )
-    )
-
-    # 3. After the first gripper controller is ready, start the second gripper controller
-    delay_gripper_2_spawner = RegisterEventHandler(
-        OnProcessExit(
-            target_action=gripper_1_controller_spawner,
-            on_exit=[
-                gripper_2_controller_spawner
-            ]
-        )
+    bridge = Node(
+        package='ros_gz_bridge', executable='parameter_bridge',
+        arguments=['/clock@rosgraph_msgs/msg/Clock[gz.msgs.Clock'], output='screen'
     )
 
     return LaunchDescription([
-        # Arguments
-        declare_use_sim_time_cmd,
-        
-        # Environment and Simulation
         set_gz_resource_path,
         gazebo,
-        clock_bridge, 
-        
-        # Robot State
+        bridge,
         robot_state_publisher,
-        
-        # Immediate Spawning
         spawn_entity,
-        
-        # Control nodes, waiting on process exit
-        delay_broadcaster_spawner,
-        delay_gripper_1_spawner,
-        delay_gripper_2_spawner,
+        RegisterEventHandler(OnProcessExit(target_action=spawn_entity, on_exit=[joint_state_broadcaster])),
+        RegisterEventHandler(OnProcessExit(target_action=joint_state_broadcaster, on_exit=[gripper_controller])),
+        RegisterEventHandler(OnProcessExit(target_action=gripper_controller, on_exit=[move_group_node])),
+        RegisterEventHandler(OnProcessExit(target_action=gripper_controller, on_exit=[rviz_node])),
     ])
