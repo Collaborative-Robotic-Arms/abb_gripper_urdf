@@ -49,8 +49,7 @@
       <parent link="${gripper_prefix}base_link" />
       <child link="${gripper_prefix}ABB_Gripper_Finger_1" />
       <axis xyz="-1 0 0" />
-      <dynamics damping="0.5" friction="0.0"/>
-      <limit lower="0.0" upper="0.0135" effort="100.0" velocity="1.0"/>
+      <limit lower="0.0" upper="0.0135" effort="200.0" velocity="1.0"/>
     </joint>
     
     <link name="${gripper_prefix}ABB_Gripper_Finger_2">
@@ -72,13 +71,56 @@
       <parent link="${gripper_prefix}base_link" />
       <child link="${gripper_prefix}ABB_Gripper_Finger_2" />
       <axis xyz="1 0 0" />
-      <dynamics damping="0.5" friction="0.0"/>
-      <limit lower="0.0" upper="0.0135" effort="100.0" velocity="1.0"/>
+      <limit lower="0.0" upper="0.0135" effort="200.0" velocity="1.0"/>
     </joint>
 
-    <!-- ================= ROS2 CONTROL & GAZEBO PLUGIN CONSOLIDATED ================= -->
-    <!-- These blocks have been removed from this file and must be placed 
-         in the top-level dual_arms Xacro file. -->
+    <gazebo reference="${gripper_prefix}ABB_Gripper_Finger_1">
+      <surface>
+        <friction>
+          <torsional>
+            <ode/>
+          </torsional>
+          <ode>
+            <mu>100</mu>
+            <mu2>100</mu2>
+            <slip1>0.0</slip1>
+            <slip2>0.0</slip2>
+          </ode>
+        </friction>
+        <contact>
+          <ode>
+            <max_vel>0.0</max_vel>
+            <min_depth>0.001</min_depth>
+            <kp>100000</kp>
+            <kd>10</kd>
+          </ode>
+        </contact>
+      </surface>
+    </gazebo>
+
+    <gazebo reference="${gripper_prefix}ABB_Gripper_Finger_2">
+      <surface>
+        <friction>
+          <torsional>
+            <ode/>
+          </torsional>
+          <ode>
+            <mu>100</mu>
+            <mu2>100</mu2>
+            <slip1>0.0</slip1>
+            <slip2>0.0</slip2>
+          </ode>
+        </friction>
+        <contact>
+          <ode>
+            <max_vel>0.0</max_vel>
+            <min_depth>0.001</min_depth>
+            <kp>100000</kp>
+            <kd>10</kd>
+          </ode>
+        </contact>
+      </surface>
+    </gazebo>
   
   </xacro:macro>
 </robot>
