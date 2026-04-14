@@ -41,7 +41,10 @@
         <material name="White"><color rgba="1 1 1 1" /></material>
       </visual>
       <collision>
-        <geometry><mesh filename="package://abb_gripper_urdf/meshes/ABB_Gripper_Finger_1.STL" /></geometry>
+        <origin xyz="-0.0123 0.17 -0.0015" rpy="0 0 0" /> 
+        <geometry>
+          <box size="0.013 0.04 0.018" /> 
+        </geometry>
       </collision>
     </link>
     
@@ -49,7 +52,7 @@
       <parent link="${gripper_prefix}base_link" />
       <child link="${gripper_prefix}ABB_Gripper_Finger_1" />
       <axis xyz="-1 0 0" />
-      <limit lower="0.0" upper="0.0135" effort="200.0" velocity="1.0"/>
+      <limit lower="0.0" upper="0.0135" effort="20.0" velocity="1.0"/>
     </joint>
     
     <link name="${gripper_prefix}ABB_Gripper_Finger_2">
@@ -63,7 +66,10 @@
         <material name="White"><color rgba="1 1 1 1" /></material>
       </visual>
       <collision>
-        <geometry><mesh filename="package://abb_gripper_urdf/meshes/ABB_Gripper_Finger_2.STL" /></geometry>
+        <origin xyz="0.0122 0.17 -0.0015" rpy="0 0 0" /> 
+        <geometry>
+          <box size="0.013 0.04 0.018" /> 
+        </geometry>
       </collision>
     </link>
     
@@ -71,18 +77,22 @@
       <parent link="${gripper_prefix}base_link" />
       <child link="${gripper_prefix}ABB_Gripper_Finger_2" />
       <axis xyz="1 0 0" />
-      <limit lower="0.0" upper="0.0135" effort="200.0" velocity="1.0"/>
+      <limit lower="0.0" upper="0.0135" effort="20.0" velocity="1.0"/>
     </joint>
 
     <gazebo reference="${gripper_prefix}ABB_Gripper_Finger_1">
       <surface>
         <friction>
           <torsional>
-            <ode/>
+            <ode>
+              <coefficient>100.0</coefficient>
+              <use_patch_radius>true</use_patch_radius>
+              <patch_radius>0.015</patch_radius>
+            </ode>
           </torsional>
           <ode>
-            <mu>100</mu>
-            <mu2>100</mu2>
+            <mu>100.0</mu>
+            <mu2>100.0</mu2>
             <slip1>0.0</slip1>
             <slip2>0.0</slip2>
           </ode>
@@ -91,8 +101,8 @@
           <ode>
             <max_vel>0.0</max_vel>
             <min_depth>0.001</min_depth>
-            <kp>100000</kp>
-            <kd>10</kd>
+            <kp>1000000.0</kp>
+            <kd>1.0</kd>
           </ode>
         </contact>
       </surface>
@@ -102,11 +112,15 @@
       <surface>
         <friction>
           <torsional>
-            <ode/>
+            <ode>
+              <coefficient>100.0</coefficient>
+              <use_patch_radius>true</use_patch_radius>
+              <patch_radius>0.015</patch_radius>
+            </ode>
           </torsional>
           <ode>
-            <mu>100</mu>
-            <mu2>100</mu2>
+            <mu>100.0</mu>
+            <mu2>100.0</mu2>
             <slip1>0.0</slip1>
             <slip2>0.0</slip2>
           </ode>
@@ -115,8 +129,8 @@
           <ode>
             <max_vel>0.0</max_vel>
             <min_depth>0.001</min_depth>
-            <kp>100000</kp>
-            <kd>10</kd>
+            <kp>1000000.0</kp>
+            <kd>1.0</kd>
           </ode>
         </contact>
       </surface>
