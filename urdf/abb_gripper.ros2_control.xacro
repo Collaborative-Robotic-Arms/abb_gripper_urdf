@@ -34,78 +34,92 @@
 
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <xacro:macro name="EE_ros2control" params="" >
-
-    <!-- egp64_finger_left_joint -->
-    <joint name="egp64_finger_left_joint">
-      <command_interface name="position">
-        <param name="min">-0.001</param>
-        <param name="max">0.04</param>
-      </command_interface>
-      <command_interface name="velocity">
-        <param name="min">-0.2</param>
-        <param name="max">0.2</param>
-      </command_interface>
-      <state_interface name="position">
-        <param name="initial_value">0.0</param>
-      </state_interface>
-      <state_interface name="velocity"/>
-    </joint>
-
-    <!-- egp64_finger_right_joint -->
-    <joint name="egp64_finger_right_joint">
-      <command_interface name="position">
-        <param name="min">-0.001</param>
-        <param name="max">0.04</param>
-      </command_interface>
-      <command_interface name="velocity">
-        <param name="min">-0.2</param>
-        <param name="max">0.2</param>
-      </command_interface>
-      <state_interface name="position">
-        <param name="initial_value">0.0</param>
-      </state_interface>
-      <state_interface name="velocity"/>
-    </joint>
-
-  </xacro:macro>
+  <xacro:macro name="abb_gripper_ros2control" params="bringup" >
 
      <!-- Load ROS 2 Gazebo Plugin -->
   <xacro:unless value="${bringup}">
     
-    <gazebo>
-      <plugin filename="libgazebo_ros2_control.so" name="gazebo_ros2_control">
-        <robot_sim_type>gz_ros2_control/GazeboSimSystem</robot_sim_type>
-
-        <!-- IRB120 Controller -->
-        <parameters>$(find ros2srrc_robots)/irb120/config/controller.yaml</parameters>
-
-        <!-- End-Effector Controller (if needed) -->
-        <parameters>$(find ros2srrc_endeffectors)/${EE_name}/config/controller.yaml</parameters>
-
-      </plugin>
+  
+    <gazebo reference="${gripper_prefix}ABB_Gripper_Finger_1">
+      <surface>
+        <friction>
+          <torsional>
+            <ode>
+              <coefficient>100.0</coefficient>
+              <use_patch_radius>true</use_patch_radius>
+              <patch_radius>0.015</patch_radius>
+            </ode>
+          </torsional>
+          <ode>
+            <mu>100.0</mu>
+            <mu2>100.0</mu2>
+            <slip1>0.0</slip1>
+            <slip2>0.0</slip2>
+          </ode>
+        </friction>
+        <contact>
+          <ode>
+            <max_vel>0.0</max_vel>
+            <min_depth>0.001</min_depth>
+            <kp>1000000.0</kp>
+            <kd>1.0</kd>
+          </ode>
+        </contact>
+      </surface>
     </gazebo>
+
+    <gazebo reference="${gripper_prefix}ABB_Gripper_Finger_2">
+      <surface>
+        <friction>
+          <torsional>
+            <ode>
+              <coefficient>100.0</coefficient>
+              <use_patch_radius>true</use_patch_radius>
+              <patch_radius>0.015</patch_radius>
+            </ode>
+          </torsional>
+          <ode>
+            <mu>100.0</mu>
+            <mu2>100.0</mu2>
+            <slip1>0.0</slip1>
+            <slip2>0.0</slip2>
+          </ode>
+        </friction>
+        <contact>
+          <ode>
+            <max_vel>0.0</max_vel>
+            <min_depth>0.001</min_depth>
+            <kp>1000000.0</kp>
+            <kd>1.0</kd>
+          </ode>
+        </contact>
+      </surface>
+    </gazebo>
+
 
   </xacro:unless>
 
+  <ros2_control name="ABBGripperHardware" type="system">
+  <hardware>
+    <xacro:if value="${bringup}">
+      <plugin>abb_gripper_driver/ABBGripperHWInterface</plugin>
+    </xacro:if>
+    <xacro:unless value="${bringup}">
+      <plugin>gz_ros2_control/GazeboSimSystem</plugin>
+    </xacro:unless>
+  </hardware>
+
+  <joint name="gripper_ABB_Gripper_Finger_1_Joint">
+    <command_interface name="position" />
+    <state_interface name="position" />
+  </joint>
+
+  <joint name="gripper_ABB_Gripper_Finger_2_Joint">
+    <command_interface name="position" />
+    <state_interface name="position" />
+  </joint>
+    </ros2_control>
+  </xacro:macro>
 
 </robot>
 
-controller_manager:
-  ros__parameters:
-
-    update_rate: 250 #Hz
-
-    egp64_finger_left_controller:
-      type: position_controllers/GripperActionController
-
-    egp64_finger_right_controller:
-      type: position_controllers/GripperActionController
-
-egp64_finger_left_controller:
-  ros__parameters:
-    joint: egp64_finger_left_joint
-
-egp64_finger_right_controller:
-  ros__parameters:
-    joint: egp64_finger_right_joint

@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <robot xmlns:xacro="http://www.ros.org/wiki/xacro">
 
-  <xacro:macro name="abb_gripper" params="arm_parent_link gripper_prefix">
+  <xacro:macro name="abb_gripper" params="arm_parent_link gripper_prefix bringup">
     
     <!-- ================= LINKS & JOINTS ================= -->
     
@@ -80,61 +80,12 @@
       <limit lower="0.0" upper="0.0135" effort="20.0" velocity="1.0"/>
     </joint>
 
-    <gazebo reference="${gripper_prefix}ABB_Gripper_Finger_1">
-      <surface>
-        <friction>
-          <torsional>
-            <ode>
-              <coefficient>100.0</coefficient>
-              <use_patch_radius>true</use_patch_radius>
-              <patch_radius>0.015</patch_radius>
-            </ode>
-          </torsional>
-          <ode>
-            <mu>100.0</mu>
-            <mu2>100.0</mu2>
-            <slip1>0.0</slip1>
-            <slip2>0.0</slip2>
-          </ode>
-        </friction>
-        <contact>
-          <ode>
-            <max_vel>0.0</max_vel>
-            <min_depth>0.001</min_depth>
-            <kp>1000000.0</kp>
-            <kd>1.0</kd>
-          </ode>
-        </contact>
-      </surface>
-    </gazebo>
+    <xacro:include filename="$(find abb_gripper_urdf)/urdf/abb_gripper.ros2_control.xacro" />
+    <xacro:abb_gripper_ros2control 
+      bringup="${bringup}"
+    />
 
-    <gazebo reference="${gripper_prefix}ABB_Gripper_Finger_2">
-      <surface>
-        <friction>
-          <torsional>
-            <ode>
-              <coefficient>100.0</coefficient>
-              <use_patch_radius>true</use_patch_radius>
-              <patch_radius>0.015</patch_radius>
-            </ode>
-          </torsional>
-          <ode>
-            <mu>100.0</mu>
-            <mu2>100.0</mu2>
-            <slip1>0.0</slip1>
-            <slip2>0.0</slip2>
-          </ode>
-        </friction>
-        <contact>
-          <ode>
-            <max_vel>0.0</max_vel>
-            <min_depth>0.001</min_depth>
-            <kp>1000000.0</kp>
-            <kd>1.0</kd>
-          </ode>
-        </contact>
-      </surface>
-    </gazebo>
+
   
   </xacro:macro>
 </robot>
