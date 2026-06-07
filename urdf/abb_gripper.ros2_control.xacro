@@ -36,10 +36,15 @@
 
   <xacro:macro name="abb_gripper_ros2control" params="bringup" >
 
-     <!-- Load ROS 2 Gazebo Plugin -->
-  <xacro:unless value="${bringup}">
-    
-  
+  <ros2_control name="ABBGripperHardware" type="system">
+  <hardware>
+    <xacro:if value="${bringup}">
+      <plugin>abb_gripper_driver/ABBGripperHWInterface</plugin>
+    </xacro:if>
+    <xacro:unless value="${bringup}">
+      <!-- <plugin>gz_ros2_control/GazeboSystem</plugin> -->
+      <plugin>gazebo_ros2_control/GazeboSystem</plugin>
+
     <gazebo reference="${gripper_prefix}ABB_Gripper_Finger_1">
       <surface>
         <friction>
@@ -95,17 +100,6 @@
         </contact>
       </surface>
     </gazebo>
-
-
-  </xacro:unless>
-
-  <ros2_control name="ABBGripperHardware" type="system">
-  <hardware>
-    <xacro:if value="${bringup}">
-      <plugin>abb_gripper_driver/ABBGripperHWInterface</plugin>
-    </xacro:if>
-    <xacro:unless value="${bringup}">
-      <plugin>gz_ros2_control/GazeboSimSystem</plugin>
     </xacro:unless>
   </hardware>
 
