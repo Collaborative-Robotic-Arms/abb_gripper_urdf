@@ -44,62 +44,6 @@
     <xacro:unless value="${bringup}">
       <!-- <plugin>gz_ros2_control/GazeboSystem</plugin> -->
       <plugin>gazebo_ros2_control/GazeboSystem</plugin>
-
-    <gazebo reference="${gripper_prefix}ABB_Gripper_Finger_1">
-      <surface>
-        <friction>
-          <torsional>
-            <ode>
-              <coefficient>100.0</coefficient>
-              <use_patch_radius>true</use_patch_radius>
-              <patch_radius>0.015</patch_radius>
-            </ode>
-          </torsional>
-          <ode>
-            <mu>100.0</mu>
-            <mu2>100.0</mu2>
-            <slip1>0.0</slip1>
-            <slip2>0.0</slip2>
-          </ode>
-        </friction>
-        <contact>
-          <ode>
-            <max_vel>0.0</max_vel>
-            <min_depth>0.001</min_depth>
-            <kp>1000000.0</kp>
-            <kd>1.0</kd>
-          </ode>
-        </contact>
-      </surface>
-    </gazebo>
-
-    <gazebo reference="${gripper_prefix}ABB_Gripper_Finger_2">
-      <surface>
-        <friction>
-          <torsional>
-            <ode>
-              <coefficient>100.0</coefficient>
-              <use_patch_radius>true</use_patch_radius>
-              <patch_radius>0.015</patch_radius>
-            </ode>
-          </torsional>
-          <ode>
-            <mu>100.0</mu>
-            <mu2>100.0</mu2>
-            <slip1>0.0</slip1>
-            <slip2>0.0</slip2>
-          </ode>
-        </friction>
-        <contact>
-          <ode>
-            <max_vel>0.0</max_vel>
-            <min_depth>0.001</min_depth>
-            <kp>1000000.0</kp>
-            <kd>1.0</kd>
-          </ode>
-        </contact>
-      </surface>
-    </gazebo>
     </xacro:unless>
   </hardware>
 
